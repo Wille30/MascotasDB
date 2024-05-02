@@ -19,10 +19,12 @@ jobs:
             - name: Buscar el archivo SQL
               id: get_sql
               run: |
+                # Encuentra el último archivo SQL modificado o añadido
                 LAST_SQL=$(git log -1 --diff-filter=AM --name-only --pretty=format: | grep ".sql$" | head -1)
-                echo "::set-output name=sql_file::$LAST_SQL"
+                echo "Ultimo archivo SQL encontrado: $LAST_SQL"
+                echo "export LAST_SQL=$LAST_SQL" >> $GITHUB_ENV
 
             - name: Ejecutar el último archivo SQL
-              run: psql -h ${{ secrets.POSTGRES_HOST }} -U ${{ secrets.POSTGRES_USER }} -d ${{ secrets.POSTGRES_DB }} -p ${{ secrets.POSTGRES_PORT }} -f ${{ steps.obtener_sql.outputs.archivo_sql }}
+              run: psql -h ${{ secrets.POSTGRES_HOST }} -U ${{ secrets.POSTGRES_USER }} -d ${{ secrets.POSTGRES_DB }} -p ${{ secrets.POSTGRES_PORT }} -f $LAST_SQL
               env:
                 PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
