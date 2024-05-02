@@ -10,14 +10,13 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - name: Checkout Repositorio
+            - name: Checkout de Repositorio
               uses: actions/checkout@v2
 
-            - name: Instalar PostgreSQL client
+            - name: Instalar cliente de postgres
               run: sudo apt-get -y install postgresql-client
 
             - name: Buscar el archivo SQL
-              id: get_sql
               run: |
                 # Encuentra el último archivo SQL modificado o añadido
                 LAST_SQL=$(git log -1 --diff-filter=AM --name-only --pretty=format: | grep ".sql$" | head -1)
