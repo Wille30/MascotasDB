@@ -25,4 +25,4 @@ jobs:
 
             -  name: Ejecutar el último archivo SQL
                run: |
-                cat $LAST_SQL | psql "${{ secrets.POSTGRES_URL }}"
+                cat $LAST_SQL | psql ${{ secrets.POSTGRES_URL }}
