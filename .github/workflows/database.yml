@@ -13,22 +13,16 @@ jobs:
             - name: Checkout Repositorio
               uses: actions/checkout@v2
 
+            - name: Instalar PostgreSQL client
+              run: sudo apt-get -y install postgresql-client
+
             - name: Buscar el archivo SQL
               id: get_sql
               run: |
                 LAST_SQL=$(git log -1 --diff-filter=AM --name-only --pretty=format: | grep ".sql$" | head -1)
                 echo "::set-output name=sql_file::$LAST_SQL"
 
-            - name: Conexión a db
-              uses: aiven/aiven-setup-action@v1
-              with:
-                aiven_project: miumg-pethope
-                aiven_service_name: pgsqlumgpets
-                aiven_service_type: pg
-                aiven_cloud: digitalocean
-                aiven_ca: ${{ secrets.AIVEN_CA }}
-                aiven_cert: ${{ secrets.AIVEN_CERT }}
-                aiven_key: ${{ secrets.AIVEN_KEY }}
-
-            - name: Ejecución de script
-              run: psql -h ${{ secrets.POSTGRES_HOST }} -U ${{ secrets.POSTGRES_USER }} -d ${{ secrets.POSTGRES-DB }} -p ${{ secrets.POSTGRES_PORT }} -f ${{ steps.get_sql.outputs.sql_file }}
+            - name: Ejecutar el último archivo SQL
+              run: psql -h ${{ secrets.POSTGRES_HOST }} -U ${{ secrets.POSTGRES_USER }} -d ${{ secrets.POSTGRES_DB }} -p ${{ secrets.POSTGRES_PORT }} -f ${{ steps.obtener_sql.outputs.archivo_sql }}
+              env:
+                PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
