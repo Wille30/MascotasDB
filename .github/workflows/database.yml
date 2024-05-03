@@ -15,14 +15,26 @@ jobs:
 
             - name: Instalar cliente de postgres
               run: sudo apt-get -y install postgresql-client
-
-            - name: Buscar el archivo SQL
+            
+            - name: Buscar el último archivo SQL
+              id: get_sql
               run: |
                 # Encuentra el último archivo SQL modificado o añadido
                 LAST_SQL=$(git log -1 --diff-filter=AM --name-only --pretty=format: | grep ".sql$" | head -1)
-                echo "Ultimo archivo SQL encontrado: $LAST_SQL"
-                echo "export LAST_SQL=$LAST_SQL" >> $GITHUB_ENV
+                echo "Último archivo SQL encontrado: $LAST_SQL"
+                echo "::set-output name=sql_file::$LAST_SQL"
 
-            -  name: Ejecutar el último archivo SQL
+            - name: Subir archivo SQL como artefacto
+              uses: actions/upload-artifact@v2
+              with:
+                name: sql-script
+                path: ${{ steps.get_sql.outputs.sql_file }}
+
+            - name: Descargar archivo SQL
+              uses: actions/download-artifact@v2
+              with:
+                name: sql-script
+
+            -  name: Ejecutar el archivo SQL
                run: |
-                cat $LAST_SQL | psql ${{ secrets.POSTGRES_URL }}
+                cat ${{ steps.get_sql.outputs.sql_file }} | psql "${{ secrets.POSTGRES_URL }}"
